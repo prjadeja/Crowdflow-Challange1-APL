@@ -28,12 +28,12 @@ The frontend connects to the backend to get real-time crowd changes.
 - **Set Environment Variable**: Create a `.env.local` containing `NEXT_PUBLIC_BACKEND_URL=http://localhost:3001` (or your chosen backend deployment URL).
 - You can copy from `frontend/.env.example` and update the value.
 - **Run Locally**: `npm run dev` (Runs on port 3000)
+- If `NEXT_PUBLIC_BACKEND_URL` is not set, frontend runs an in-browser simulation mode (no separate backend needed).
 - **Deployment (Vercel)**:
   - Connect your GitHub repo to Vercel.
   - Set the framework preset to "Next.js".
   - Set the Root Directory to `frontend`.
-  - Add the `NEXT_PUBLIC_BACKEND_URL` environment variable pointing to your hosted Socket.io backend.
-  - Note: Production build will not fallback to localhost; env var is required.
+  - Optional: Add `NEXT_PUBLIC_BACKEND_URL` for live backend mode. If omitted, Vercel runs simulation mode.
   - Deploy.
 
 ## 🛠️ Tech Stack

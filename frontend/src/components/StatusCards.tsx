@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useCrowdStore } from "@/store/useCrowdStore";
-import { BACKEND_URL, hasBackendUrl } from "@/config/backend";
 import { Clock, Users } from "lucide-react";
 
-function FoodZoneItem({ zone }: { zone: any }) {
+function FoodZoneItem({ zone, joinQueue }: { zone: any; joinQueue: (zoneId: string) => Promise<boolean> }) {
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,27 +22,14 @@ function FoodZoneItem({ zone }: { zone: any }) {
         <button 
           disabled={isJoined || isLoading}
           onClick={async () => {
-            if (!hasBackendUrl) {
-              alert("Backend URL is missing. Set NEXT_PUBLIC_BACKEND_URL.");
-              return;
-            }
             setIsLoading(true);
-            try {
-              const res = await fetch(`${BACKEND_URL}/api/queue/join`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ zoneId: zone.id })
-              });
-              if (res.ok) {
-                setIsJoined(true);
-              } else {
-                alert("Failed to join queue. Try again.");
-              }
-            } catch (err) {
-              console.error(err);
+            const ok = await joinQueue(zone.id);
+            setIsLoading(false);
+
+            if (ok) {
+              setIsJoined(true);
+            } else {
               alert("Network error.");
-            } finally {
-              setIsLoading(false);
             }
           }}
           className={`text-[11px] font-bold px-3 py-1 rounded-md transition-transform ${
@@ -60,7 +46,7 @@ function FoodZoneItem({ zone }: { zone: any }) {
 }
 
 export default function StatusCards() {
-  const { zones } = useCrowdStore();
+  const { zones, joinQueue } = useCrowdStore();
 
   const foodZones = zones.filter(z => z.type === 'food');
   const gateZones = zones.filter(z => z.type === 'gate');
@@ -84,7 +70,7 @@ export default function StatusCards() {
           
           <div className="space-y-3 relative z-10">
             {foodZones.map(zone => (
-              <FoodZoneItem key={zone.id} zone={zone} />
+              <FoodZoneItem key={zone.id} zone={zone} joinQueue={joinQueue} />
             ))}
           </div>
         </div>
