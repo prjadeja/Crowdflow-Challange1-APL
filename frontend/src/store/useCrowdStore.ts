@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
+import { BACKEND_URL, hasBackendUrl } from '@/config/backend';
 
 export type Zone = {
   id: string;
@@ -28,9 +29,6 @@ interface CrowdState {
   setActiveRoute: (route: string | null) => void;
 }
 
-// Ensure the backend URL matches the environment or fallback to localhost
-const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-
 export const useCrowdStore = create<CrowdState>((set, get) => ({
   socket: null,
   isConnected: false,
@@ -41,8 +39,12 @@ export const useCrowdStore = create<CrowdState>((set, get) => ({
   
   connect: () => {
     if (get().socket) return; // Already connected
+    if (!hasBackendUrl) {
+      console.warn('NEXT_PUBLIC_BACKEND_URL is missing. Skipping socket connection.');
+      return;
+    }
 
-    const socket = io(NEXT_PUBLIC_BACKEND_URL);
+    const socket = io(BACKEND_URL);
 
     socket.on('connect', () => {
       set({ isConnected: true });

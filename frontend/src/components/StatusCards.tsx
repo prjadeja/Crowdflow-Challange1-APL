@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCrowdStore } from "@/store/useCrowdStore";
+import { BACKEND_URL, hasBackendUrl } from "@/config/backend";
 import { Clock, Users } from "lucide-react";
 
 function FoodZoneItem({ zone }: { zone: any }) {
@@ -22,10 +23,13 @@ function FoodZoneItem({ zone }: { zone: any }) {
         <button 
           disabled={isJoined || isLoading}
           onClick={async () => {
+            if (!hasBackendUrl) {
+              alert("Backend URL is missing. Set NEXT_PUBLIC_BACKEND_URL.");
+              return;
+            }
             setIsLoading(true);
             try {
-              const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-              const res = await fetch(`${backendUrl}/api/queue/join`, {
+              const res = await fetch(`${BACKEND_URL}/api/queue/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ zoneId: zone.id })
